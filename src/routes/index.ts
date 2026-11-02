@@ -19,7 +19,10 @@ indexRouter.route('/').get((req: Request, res: Response) => {
       res.sendFile(`${process.env.PWD}/public/simple.html`);
       break;
     case 'userInfo':
-      res.sendFile(`${process.env.PWD}/public/userInfo.html`);
+      res.render('userInfo', {
+        mac: req.session.macAddr,
+        ap_mac: req.session.accessPoint,
+      });
       break;
     case 'custom':
       res.sendFile(`${process.env.PWD}/public/custom.html`);

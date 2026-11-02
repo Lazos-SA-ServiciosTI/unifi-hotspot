@@ -4,7 +4,7 @@ import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT as GoogleAuthJWT, CredentialBody } from 'google-auth-library';
 
 interface FormData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const webhook = async (formData: FormData): Promise<void> => {
@@ -61,7 +61,20 @@ export const googleSheets = async (formData: FormData): Promise<void> => {
     const sheet = doc.sheetsByIndex[0];
 
     // Add a new row with formData
-    const newRow = await sheet.addRow(formData);
+    const row = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [
+        key,
+        typeof value === 'string' ||
+        typeof value === 'number' ||
+        typeof value === 'boolean' ||
+        value instanceof Date
+          ? value
+          : value == null
+            ? ''
+            : String(value),
+      ]),
+    );
+    const newRow = await sheet.addRow(row);
 
     logger.info(`Row added successfully: ${newRow}`);
   } catch (err) {

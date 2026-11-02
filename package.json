@@ -4,8 +4,8 @@
   "description": "A Unifi Captive Portal",
   "main": "dist/index.js",
   "scripts": {
-    "test": "cross-env UNIFI_SITENAME=default SECRET=secretString UNIFI_URL=https://unifi.jamiewood.io jest --detectOpenHandles",
-    "test:watch": "cross-env UNIFI_SITENAME=default SECRET=secretString UNIFI_URL=https://unifi.jamiewood.io jest --watchAll --detectOpenHandles",
+    "test": "npm run build && jest --detectOpenHandles",
+    "test:watch": "npm run build && jest --watchAll --detectOpenHandles",
     "start": "npm run build && node dist/index.js",
     "build": "tsc",
     "docs:dev": "vuepress dev docs",

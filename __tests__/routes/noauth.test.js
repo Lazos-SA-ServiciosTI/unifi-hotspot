@@ -1,29 +1,16 @@
 const request = require('supertest');
-const app = require('../../src/server');
 
-describe('get /guest/s/process.env.SITENAME/ with no auth', () => {
-  const OLD_ENV = process.env;
+beforeAll(() => {
+  process.env.AUTH = 'none';
+});
 
-  beforeEach(() => {
-    jest.resetModules();
-    process.env = {
-      ...OLD_ENV,
-    };
-    delete process.env.NODE_ENV;
-    process.env.AUTH = 'none';
-  });
+afterAll(() => {
+  delete process.env.AUTH;
+});
 
-  afterEach(() => {
-    process.env = OLD_ENV;
-  });
-
-  it('should return a 200', async () => {
-    const res = await request(app).get(`/guest/s/${process.env.SITENAME}/`);
-    expect(res.statusCode).toEqual(200);
-  });
-
-  it('should return the noAuth page', async () => {
-    const res = await request(app).get(`/guest/s/${process.env.SITENAME}/`);
-    expect(res.text).toContain('<title>Portal Page - No Auth</title>');
-  });
+test('no-auth portal is displayed', async () => {
+  const app = require('../../dist/server').default;
+  const res = await request(app).get('/guest/s/default/');
+  expect(res.statusCode).toBe(200);
+  expect(res.text).toContain('<title>Portal Page - No Auth</title>');
 });

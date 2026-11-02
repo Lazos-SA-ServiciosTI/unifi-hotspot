@@ -1,5 +1,6 @@
 // standaloneUnifiModule.ts
 import { AxiosInstance, AxiosResponse } from 'axios';
+import { Request } from 'express';
 import { UnifiApiService } from '../interfaces/UnifiApiService';
 import { logger } from '../utils/logger';
 import { config } from '../utils/config';
@@ -20,15 +21,25 @@ export const standaloneUnifiModule: UnifiApiService = {
   },
   authorise: async (
     unifiApiClient: AxiosInstance,
-    req: any,
+    req: Request,
   ): Promise<AxiosResponse> => {
+    const payload = {
+      cmd: 'authorize-guest',
+      mac: req.session.macAddr,
+      ap_mac: req.session.accessPoint,
+      minutes: 60,
+    };
+
+    if (!payload.mac) {
+      logger.error('Unifi Device Authorisation Failed: Missing MAC Address');
+      throw new Error('Unifi Device Authorisation Failed: Missing MAC Address');
+    }
+
+    logger.debug(`Authorising device with payload: ${JSON.stringify(payload)}`);
+
     const authorizeResponse = await unifiApiClient.post(
       `/api/s/${config.unifiSiteIdentifier}/cmd/stamgr`,
-      JSON.stringify({
-        cmd: 'authorize-guest',
-        mac: req.session.macAddr,
-        ap_mac: req.session.accessPoint,
-      }),
+      JSON.stringify(payload),
     );
     if (authorizeResponse.data.meta.rc === 'ok') {
       logger.debug('Unifi Device Authorisation Successful');
@@ -63,7 +74,7 @@ export const integratedUnifiModule: UnifiApiService = {
   },
   authorise: async (
     unifiApiClient: AxiosInstance,
-    req: any,
+    req: Request,
   ): Promise<AxiosResponse> => {
     const authorizeResponse = await unifiApiClient.post(
       `/proxy/network/api/s/${config.unifiSiteIdentifier}/cmd/stamgr`,

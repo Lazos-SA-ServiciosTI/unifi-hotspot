@@ -1,16 +1,13 @@
 const request = require('supertest');
-const app = require('../../src/server');
+const app = require('../../dist/server').default;
 
-describe('get /', () => {
-  it('should return a 301', async () => {
-    const res = await request(app).get('/');
-    expect(res.statusCode).toEqual(301);
-  });
+test('root redirects to the configured guest portal', async () => {
+  const res = await request(app).get('/');
+  expect(res.statusCode).toBe(301);
+  expect(res.headers.location).toBe('/guest/s/default/');
 });
 
-describe('get randomPage', () => {
-  it('should return a 404', async () => {
-    const res = await request(app).get(`/${Math.floor(Math.random() * 10)}`);
-    expect(res.statusCode).toEqual(404);
-  });
+test('unknown route returns 404', async () => {
+  const res = await request(app).get('/unknown-test-route');
+  expect(res.statusCode).toBe(404);
 });

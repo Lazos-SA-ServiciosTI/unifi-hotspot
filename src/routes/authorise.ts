@@ -17,13 +17,27 @@ const unifiAuthServices: Record<UnifiControllerType, UnifiApiService> = {
 const selectedModules = unifiAuthServices[config.unifiControllerType];
 
 authoriseRouter.route('/').post(async (req: Request, res: Response) => {
+  if (!req.session.macAddr) {
+    res.status(400).json({
+      err: {
+        message:
+          'Missing client MAC address in session. Please reconnect to the hotspot.',
+      },
+    });
+    return;
+  }
+
   try {
     const unifiApiClient = createAxiosInstance();
     logger.debug('Starting Unifi Login Attempt');
     await selectedModules.login(unifiApiClient);
 
     if (config.logAuthDriver) {
-      await logAuth(req.body);
+      await logAuth({
+        ...req.body,
+        mac: req.session.macAddr,
+        ap_mac: req.session.accessPoint,
+      });
     }
 
     logger.debug('Starting Unifi Device Authorisation Attempt');
@@ -58,7 +72,7 @@ authoriseRouter.route('/').post(async (req: Request, res: Response) => {
 export default authoriseRouter;
 
 // Handle LogAuth
-const logAuth = async (formData: any): Promise<void> => {
+const logAuth = async (formData: Record<string, unknown>): Promise<void> => {
   switch (config.logAuthDriver) {
     case 'webhook':
       await webhook(formData);

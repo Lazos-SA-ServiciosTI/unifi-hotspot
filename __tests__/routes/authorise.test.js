@@ -28,6 +28,19 @@ test('uses session MACs for logging and UniFi authorization for 60 minutes', asy
   const res = await agent.post('/authorise').type('form').send({ name: 'Test', email: 'test@example.com', mac: 'forged', ap_mac: 'forged-ap' });
   expect(res.statusCode).toBe(302);
   expect(webhook).toHaveBeenCalledWith(expect.objectContaining({ mac: 'session-client', ap_mac: 'session-ap' }));
+  expect(webhook.mock.calls.map(([payload]) => payload.status)).toEqual(['pending', 'authorized']);
+  expect(webhook.mock.calls[0][0].attempt_id).toBe(webhook.mock.calls[1][0].attempt_id);
   const authCall = post.mock.calls.find(([url]) => url.includes('/cmd/stamgr'));
   expect(JSON.parse(authCall[1])).toEqual({ cmd: 'authorize-guest', mac: 'session-client', ap_mac: 'session-ap', minutes: 60 });
+});
+
+test('records an error when UniFi cannot confirm authorization', async () => {
+  const post = jest.fn().mockRejectedValue(new Error('controller unavailable'));
+  createAxiosInstance.mockReturnValue({ post });
+  const agent = request.agent(app);
+  await agent.get('/guest/s/default/').query({ id: 'session-client', ap: 'session-ap' });
+  const res = await agent.post('/authorise').type('form').send({ name: 'Test', email: 'test@example.com' });
+  expect(res.statusCode).toBe(500);
+  expect(webhook.mock.calls.map(([payload]) => payload.status)).toEqual(['pending', 'error']);
+  expect(webhook.mock.calls[0][0].attempt_id).toBe(webhook.mock.calls[1][0].attempt_id);
 });

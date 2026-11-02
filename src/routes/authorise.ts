@@ -3,6 +3,7 @@ import { logger } from '../utils/logger';
 import { webhook, googleSheets } from '../utils/logAuthDrivers';
 import { config, UnifiControllerType } from '../utils/config';
 import { createAxiosInstance } from '../utils/axios';
+import { randomUUID } from 'crypto';
 
 import { UnifiApiService } from '../interfaces/UnifiApiService';
 import { standaloneUnifiModule, integratedUnifiModule } from '../unifi/index';
@@ -27,21 +28,23 @@ authoriseRouter.route('/').post(async (req: Request, res: Response) => {
     return;
   }
 
+  const attempt = {
+    ...req.body,
+    mac: req.session.macAddr,
+    ap_mac: req.session.accessPoint,
+    attempt_id: randomUUID(),
+  };
+  let authorised = false;
+  await logAuth({ ...attempt, status: 'pending' });
   try {
     const unifiApiClient = createAxiosInstance();
     logger.debug('Starting Unifi Login Attempt');
     await selectedModules.login(unifiApiClient);
 
-    if (config.logAuthDriver) {
-      await logAuth({
-        ...req.body,
-        mac: req.session.macAddr,
-        ap_mac: req.session.accessPoint,
-      });
-    }
-
     logger.debug('Starting Unifi Device Authorisation Attempt');
     await selectedModules.authorise(unifiApiClient, req);
+    authorised = true;
+    await logAuth({ ...attempt, status: 'authorized' });
 
     if (config.showConnecting === 'true') {
       logger.debug(`Redirecting to ${'./connecting'}`);
@@ -61,11 +64,15 @@ authoriseRouter.route('/').post(async (req: Request, res: Response) => {
     logger.debug('Starting Unifi Logout Attempt');
     await selectedModules.logout(unifiApiClient);
   } catch (err) {
-    res.status(500).json({
-      err: {
-        message: 'An Error has occurred. Please try again.',
-      },
-    });
+    if (!authorised) {
+      await logAuth({ ...attempt, status: 'error' });
+    }
+    if (!res.headersSent)
+      res.status(500).json({
+        err: {
+          message: 'An Error has occurred. Please try again.',
+        },
+      });
   }
 });
 

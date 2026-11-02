@@ -6,6 +6,8 @@ Este repositorio es un fork de [unifi-hotspot](https://github.com/woodjme/unifi-
 
 Las adaptaciones incluyen el registro de las direcciones MAC, la autorización de invitados y pruebas para el flujo personalizado.
 
+El registro envía un identificador por intento y los estados `pending`, `authorized` o `error` al driver configurado. `error` indica que no se pudo confirmar la autorización y no necesariamente que UniFi la rechazó. Si el registro falla, la autorización continúa y el estado puede quedar incompleto.
+
 ---
 
 ## README original de unifi-hotspot

@@ -2,12 +2,13 @@
 
 ## Fork mantenido por Lazos S.A.
 
-Este repositorio es un fork de
-[unifi-hotspot](https://github.com/woodjme/unifi-hotspot), mantenido por
-Lazos S.A. para su integración con el portal cautivo de la Municipalidad de Valdivia.
+Este repositorio es un fork de [unifi-hotspot](https://github.com/woodjme/unifi-hotspot), mantenido por Lazos S.A.
 
-Las adaptaciones incluyen el registro de las direcciones MAC, la
-autorización de invitados y pruebas para el flujo personalizado.
+Las adaptaciones incluyen el registro de las direcciones MAC, la autorización de invitados y pruebas para el flujo personalizado.
+
+---
+
+## README original de unifi-hotspot
 
 > **Want this without running a server?** [GuestGate](https://www.guestgate.cloud) is the hosted version, from the same author. It connects with a UniFi API key, so it works with MFA-protected accounts and needs no port forwarding, and adds branded login pages, a guest list, webhooks and Zapier. [Start a free trial](https://app.guestgate.cloud/register).
 
@@ -30,4 +31,3 @@ For detailed information on how to set up and use this application, please refer
 - The `URI` environment variable has been renamed to `UNIFI_CONTROLLER_URL`.
 - The `SITENAME` environment variable has been renamed to `UNIFI_SITE_IDENTIFIER`.
 - The `LOG_AUTH_GOOGLE_SERVICE_ACCOUNT_EMAIL` and `LOG_AUTH_GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` environment variables have been replaced with `LOG_AUTH_GOOGLE_CREDENTIALS`.
-

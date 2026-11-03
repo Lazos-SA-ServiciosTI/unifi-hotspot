@@ -5,6 +5,7 @@ jest.mock('../../dist/utils/logAuthDrivers', () => ({ webhook: jest.fn(), google
 
 process.env.AUTH = 'userInfo';
 process.env.LOG_AUTH_DRIVER = 'webhook';
+process.env.HOTSPOT_ID = 'hotspot1';
 const { createAxiosInstance } = require('../../dist/utils/axios');
 const { webhook } = require('../../dist/utils/logAuthDrivers');
 const app = require('../../dist/server').default;
@@ -29,6 +30,7 @@ test('uses session MACs for logging and UniFi authorization for 60 minutes', asy
   expect(res.statusCode).toBe(302);
   expect(webhook).toHaveBeenCalledWith(expect.objectContaining({ mac: 'session-client', ap_mac: 'session-ap' }));
   expect(webhook.mock.calls.map(([payload]) => payload.status)).toEqual(['pending', 'authorized']);
+  expect(webhook.mock.calls[0][0].hotspot_id).toBe('hotspot1');
   expect(webhook.mock.calls[0][0].attempt_id).toBe(webhook.mock.calls[1][0].attempt_id);
   const authCall = post.mock.calls.find(([url]) => url.includes('/cmd/stamgr'));
   expect(JSON.parse(authCall[1])).toEqual({ cmd: 'authorize-guest', mac: 'session-client', ap_mac: 'session-ap', minutes: 60 });

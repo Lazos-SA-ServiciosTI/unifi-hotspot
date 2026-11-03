@@ -8,6 +8,8 @@ Las adaptaciones incluyen el registro de las direcciones MAC, la autorización d
 
 El registro envía un identificador por intento y los estados `pending`, `authorized` o `error` al driver configurado. `error` indica que no se pudo confirmar la autorización y no necesariamente que UniFi la rechazó. Si el registro falla, la autorización continúa y el estado puede quedar incompleto.
 
+La variable `HOTSPOT_ID` identifica la instancia del portal y se incluye en los registros enviados al driver. Para el webhook de la integración municipal es obligatoria.
+
 ---
 
 ## README original de unifi-hotspot

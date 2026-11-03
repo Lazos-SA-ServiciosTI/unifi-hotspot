@@ -32,6 +32,7 @@ authoriseRouter.route('/').post(async (req: Request, res: Response) => {
     ...req.body,
     mac: req.session.macAddr,
     ap_mac: req.session.accessPoint,
+    hotspot_id: process.env.HOTSPOT_ID,
     attempt_id: randomUUID(),
   };
   let authorised = false;
